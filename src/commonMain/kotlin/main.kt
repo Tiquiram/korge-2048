@@ -23,6 +23,13 @@ import kotlin.properties.*
 import kotlin.random.*
 
 
+
+fun create_bgField(parent: Container, fieldSize: Double, leftIndent: Double, topIndent: Double): RoundRect {
+	return parent.roundRect(fieldSize, fieldSize, 5.0, fill = Colors["#b9aea0"]) {
+		position(leftIndent, topIndent)
+	}
+}
+
 suspend fun main() = Korge(width = 480, height = 640, title = "2048", bgcolor = RGBA(253, 247, 240)) {
 	// TODO: we will write code for our game here later
 	val cellSize = views.virtualWidth / 5.0
@@ -30,14 +37,16 @@ suspend fun main() = Korge(width = 480, height = 640, title = "2048", bgcolor = 
 	val fieldSize = 50 + 4 * cellSize
 	val leftIndent = (views.virtualWidth - fieldSize) / 2
 	val topIndent = 150.0
+//
+//	//View DSL
+//	val bgField = roundRect(fieldSize, fieldSize, 5.0, fill = Colors["#b9aea0"]) {
+//		position(leftIndent, topIndent)
+//	}
 
-	//View DSL
-	val bgField = roundRect(fieldSize, fieldSize, 5.0, fill = Colors["#b9aea0"]) {
-		position(leftIndent, topIndent)
-	}
+	val bgField = create_bgField(this, fieldSize, leftIndent, topIndent)
 
 	//Adding Cells to the field
-	graphics {
+	this.graphics {
 		position(leftIndent, topIndent)
 		fill(Colors["#cec0b2"]) {
 			for (i in 0..3) {
@@ -68,10 +77,7 @@ suspend fun main() = Korge(width = 480, height = 640, title = "2048", bgcolor = 
 		centerXOn(bgBest)
 		alignTopToTopOf(bgBest, 5.0)
 	}
-	text("BEST", cellSize * 0.25, RGBA(239, 226, 210), font) {
-		centerXOn(bgBest)
-		alignTopToTopOf(bgBest, 5.0)
-	}
+
 	text("0", cellSize * 0.5, Colors.WHITE, font) {
 		setTextBounds(Rectangle(0.0, 0.0, bgBest.width, cellSize - 24.0))
 		alignment = TextAlignment.MIDDLE_CENTER
