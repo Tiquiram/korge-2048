@@ -29,19 +29,33 @@ fun create_bgField(parent: Container, fieldSize: Double, leftIndent: Double, top
 		position(leftIndent, topIndent)
 	}
 }
+var cellSize: Double = 0.0
+var fieldSize: Double = 0.0
+var leftIndent: Double = 0.0
+var topIndent: Double = 0.0
+var font: BitmapFont by Delegates.notNull()
+var map = PositionMap()
+val blocks = mutableMapOf<Int, Block>()
+
+var freeId = 0
+fun columnX(number: Int) = leftIndent + 10 + (cellSize + 10) * number
+fun rowY(number: Int) = topIndent + 10 + (cellSize + 10) * number
+fun Container.createNewBlockWithId(id: Int, number: Number, position: Position) {
+	blocks[id] = block(number).position(columnX(position.x), rowY(position.y))
+}
+fun Container.createNewBlock(number: Number, position: Position): Int {
+	val id = freeId++
+	createNewBlockWithId(id, number, position)
+	return id
+}
 
 suspend fun main() = Korge(width = 480, height = 640, title = "2048", bgcolor = RGBA(253, 247, 240)) {
-	// TODO: we will write code for our game here later
-	val cellSize = views.virtualWidth / 5.0
+	font = resourcesVfs["clear_sans.fnt"].readBitmapFont()
 
-	val fieldSize = 50 + 4 * cellSize
-	val leftIndent = (views.virtualWidth - fieldSize) / 2
-	val topIndent = 150.0
-//
-//	//View DSL
-//	val bgField = roundRect(fieldSize, fieldSize, 5.0, fill = Colors["#b9aea0"]) {
-//		position(leftIndent, topIndent)
-//	}
+	cellSize = views.virtualWidth / 5.0
+	fieldSize = 50 + 4 * cellSize
+	leftIndent = (views.virtualWidth - fieldSize) / 2
+	topIndent = 150.0
 
 	val bgField = create_bgField(this, fieldSize, leftIndent, topIndent)
 
@@ -117,7 +131,5 @@ suspend fun main() = Korge(width = 480, height = 640, title = "2048", bgcolor = 
 		alignTopToTopOf(restartBlock)
 		alignRightToLeftOf(restartBlock, 5.0)
 	}
-
+	generateBlock()
 }
-
-
