@@ -1,10 +1,12 @@
+import com.soywiz.kds.*
+import kotlin.random.*
+import com.soywiz.korge.*
+import com.soywiz.korge.view.*
+
 class Position(val x: Int, val y: Int)
 
-fun Container.generateBlock() {
-    val position = map.getRandomFreePosition() ?: return
-    val number = if (Random.nextDouble() < 0.9) Number.ZERO else Number.ONE
-    val newId = createNewBlock(number, position)
-    map[position.x, position.y] = newId
+enum class Direction {
+    LEFT, RIGHT, TOP, BOTTOM
 }
 
 class PositionMap(private val array: IntArray2 = IntArray2(4, 4, -1)) {
@@ -36,5 +38,17 @@ class PositionMap(private val array: IntArray2 = IntArray2(4, 4, -1)) {
     override fun equals(other: Any?): Boolean {
         return (other is PositionMap) && this.array.data.contentEquals(other.array.data)
     }
+
+    fun hasAvailableMoves(): Boolean {
+        array.each { x, y, _ ->
+            if (hasAdjacentEqualPosition(x, y)) return true
+        }
+        return false
+    }
+
+    private fun hasAdjacentEqualPosition(x: Int, y: Int) = getNumber(x, y).let {
+        it == getNumber(x - 1, y) || it == getNumber(x + 1, y) || it == getNumber(x, y - 1) || it == getNumber(x, y + 1)
+    }
+
     override fun hashCode() = array.hashCode()
 }

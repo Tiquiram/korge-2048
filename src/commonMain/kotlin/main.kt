@@ -22,8 +22,6 @@ import kotlin.collections.set
 import kotlin.properties.*
 import kotlin.random.*
 
-
-
 fun create_bgField(parent: Container, fieldSize: Double, leftIndent: Double, topIndent: Double): RoundRect {
 	return parent.roundRect(fieldSize, fieldSize, 5.0, fill = Colors["#b9aea0"]) {
 		position(leftIndent, topIndent)
@@ -48,6 +46,70 @@ fun Container.createNewBlock(number: Number, position: Position): Int {
 	createNewBlockWithId(id, number, position)
 	return id
 }
+
+fun Container.generateBlock() {
+	val position = map.getRandomFreePosition() ?: return
+	val number = if (Random.nextDouble() < 0.9) Number.ZERO else Number.ONE
+	val newId = createNewBlock(number, position)
+	map[position.x, position.y] = newId
+}
+
+fun Container.showGameOver(onRestart: () -> Unit) = container {
+	val format = TextFormat(
+		color = RGBA(0, 0, 0),
+		size = 40,
+		font = Html.FontFace.Bitmap(font)
+	)
+	val skin = TextSkin(
+		normal = format,
+		over = format.copy(color = RGBA(90, 90, 90)),
+		down = format.copy(color = RGBA(120, 120, 120))
+	)
+
+	fun restart() {
+		this@container.removeFromParent()
+		onRestart()
+	}
+
+	position(leftIndent, topIndent)
+
+	roundRect(fieldSize, fieldSize, 5.0, color = Colors["#FFFFFF33"])
+	text("Game Over", 60.0, Colors.BLACK, font) {
+		centerBetween(0.0, 0.0, fieldSize, fieldSize)
+		y -= 60
+	}
+	uiText("Try again", 120.0, 35.0, skin) {
+		centerBetween(0.0, 0.0, fieldSize, fieldSize)
+		y += 20
+		onClick { restart() }
+	}
+
+	onKeyDown {
+		when (it.key) {
+			Key.ENTER, Key.SPACE -> restart()
+			else -> Unit
+		}
+	}
+}
+
+
+
+fun Stage.moveBlocksTo(direction: Direction) {
+	if (isAnimationRunning) return
+	if (!map.hasAvailableMoves()) {
+		if (!isGameOver) {
+			isGameOver = true
+			showGameOver {
+				isGameOver = false
+				restart()
+			}
+		}
+		return
+	}
+}
+
+var isAnimationRunning = false
+var isGameOver = false
 
 suspend fun main() = Korge(width = 480, height = 640, title = "2048", bgcolor = RGBA(253, 247, 240)) {
 	font = resourcesVfs["clear_sans.fnt"].readBitmapFont()
@@ -132,4 +194,23 @@ suspend fun main() = Korge(width = 480, height = 640, title = "2048", bgcolor = 
 		alignRightToLeftOf(restartBlock, 5.0)
 	}
 	generateBlock()
+
+	keys.down {
+		when (it.key) {
+			Key.LEFT -> moveBlocksTo(Direction.LEFT)
+			Key.RIGHT -> moveBlocksTo(Direction.RIGHT)
+			Key.UP -> moveBlocksTo(Direction.TOP)
+			Key.DOWN -> moveBlocksTo(Direction.BOTTOM)
+			else -> Unit
+		}
+	}
+
+	onSwipe(20.0) {
+		when (it.direction) {
+			SwipeDirection.LEFT -> moveBlocksTo(Direction.LEFT)
+			SwipeDirection.RIGHT -> moveBlocksTo(Direction.RIGHT)
+			SwipeDirection.TOP -> moveBlocksTo(Direction.TOP)
+			SwipeDirection.BOTTOM -> moveBlocksTo(Direction.BOTTOM)
+		}
+	}
 }
