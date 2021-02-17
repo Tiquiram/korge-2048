@@ -31,6 +31,7 @@ var fieldSize: Double = 0.0
 var leftIndent: Double = 0.0
 var topIndent: Double = 0.0
 var font: BitmapFont by Delegates.notNull()
+
 var map = PositionMap()
 val blocks = mutableMapOf<Int, Block>()
 var history: History by Delegates.notNull()
@@ -46,6 +47,24 @@ fun columnX(number: Int) = leftIndent + 10 + (cellSize + 10) * number
 fun rowY(number: Int) = topIndent + 10 + (cellSize + 10) * number
 fun Container.createNewBlockWithId(id: Int, number: Number, position: Position) {
 	blocks[id] = block(number).position(columnX(position.x), rowY(position.y))
+}
+
+fun Container.restoreField(history: History.Element) {
+	map.forEach { if (it != -1) deleteBlock(it) }
+	map = PositionMap()
+	score.update(history.score)
+	freeId = 0
+	val numbers = history.numberIds.map {
+		if (it >= 0 && it < Number.values().size)
+			Number.values()[it]
+		else null
+	}
+	numbers.forEachIndexed { i, number ->
+		if (number != null) {
+			val newId = createNewBlock(number, Position(i % 4, i / 4))
+			map[i % 4, i / 4] = newId
+		}
+	}
 }
 
 fun Container.generateBlockAndSave() {
@@ -131,6 +150,7 @@ fun Container.restart() {
 	map = PositionMap()
 	blocks.values.forEach { it.removeFromParent() }
 	blocks.clear()
+	score.update(0)
 	history.clear()
 	generateBlock()
 }
