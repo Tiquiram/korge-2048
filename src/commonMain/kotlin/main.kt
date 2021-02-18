@@ -327,23 +327,24 @@ suspend fun main() = Korge(width = 480, height = 640, title = "2048", bgcolor = 
 		alignTopToTopOf(bgBest, 5.0)
 	}
 
-	text("0", cellSize * 0.5, Colors.WHITE, font) {
+	val textBest = text("0", cellSize * 0.5, Colors.WHITE, font) {
 		setTextBounds(Rectangle(0.0, 0.0, bgBest.width, cellSize - 24.0))
 		alignment = TextAlignment.MIDDLE_CENTER
 		alignTopToTopOf(bgBest, 12.0)
 		centerXOn(bgBest)
 	}
+	best.observe { textBest.text = it.toString() }
 	text("SCORE", cellSize * 0.25, RGBA(239, 226, 210), font) {
 		centerXOn(bgScore)
 		alignTopToTopOf(bgScore, 5.0)
 	}
-	text("0", cellSize * 0.5, Colors.WHITE, font) {
+	val textScore = text ("0", cellSize * 0.5, Colors.WHITE, font) {
 		setTextBounds(Rectangle(0.0, 0.0, bgScore.width, cellSize - 24.0))
 		alignment = TextAlignment.MIDDLE_CENTER
 		centerXOn(bgScore)
 		alignTopToTopOf(bgScore, 12.0)
 	}
-
+	score.observe { textScore.text = it.toString() }
 	val restartImg = resourcesVfs["restart.png"].readBitmap()
 	val undoImg = resourcesVfs["undo.png"].readBitmap()
 
